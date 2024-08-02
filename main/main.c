@@ -79,7 +79,7 @@ char buffer[17];
 // static const onewire_addr_t SENSOR_ADDR1 = 0xcb1529961d64ff28;
 // static const onewire_addr_t SENSOR_ADDR2 = 0x0d3de10457703828 ;
 
-volatile bool flagMotorRUN = 0,errorFlag = 0,flagCamRUN = 0,serialFlag = 0;
+volatile bool flagMotorRUN = 0,errorFlag = 0,flagCamRUN = 0,serialFlag = 0, camShiftFlag = 0;
 volatile int cmdFlag = 0;
 
 static const unsigned char CRCHi[] = {
@@ -1312,7 +1312,7 @@ static void remote_read_task(void *pvParameter)
                         break;
                 
                 case CAM_SHIFT_RIGHT: ESP_LOGI(REMOTE_CONTR, "CAM_SHIFT_RIGHT PRESSED");
-                        if (0 == flagCamRUN)
+                        if (0 == camShiftFlag)
                         {
                             // stopCamMOTOR();
                             camRatiof = (float)camRatio/1000;
@@ -1327,11 +1327,11 @@ static void remote_read_task(void *pvParameter)
                             setCamSPEED(camMOV * camSPEED);
                             startCamMOTOR();
                             ESP_LOGI(REMOTE_CONTR, "MOVING RIGHT");
-                            flagCamRUN =1;
+                            camShiftFlag = 1;
                             }
                         break;
                  case CAM_SHIFT_LEFT: ESP_LOGI(REMOTE_CONTR, "CAM_SHIFT_LEFT PRESSED");
-                        if (0 == flagCamRUN)
+                        if (0 == camShiftFlag)
                         {
                             // stopCamMOTOR();
                             camRatiof = (float)camRatio/1000;
@@ -1346,7 +1346,7 @@ static void remote_read_task(void *pvParameter)
                             setCamSPEED(camMOV * camSPEED);
                             startCamMOTOR();
                             ESP_LOGI(REMOTE_CONTR, "MOVING LEFT");
-                            flagCamRUN =1;
+                            camShiftFlag = 1;
                             }
                         break;
 
@@ -1379,7 +1379,7 @@ static void remote_read_task(void *pvParameter)
                                 flagMotorRUN =0;
                                 // flagCamRUN =0;
                                 timerCam = stoptime;
-                                 printf("starting timerCam");
+                                printf("starting timerCam");
                                 ESP_LOGI(REMOTE_CONTR, "MOTOR STOP");
                                 lcd_clear();
                                 sprintf(buffer, "MOTOR STOPS");
@@ -1391,6 +1391,10 @@ static void remote_read_task(void *pvParameter)
                             {
                                 stopCamMOTOR();
                                 flagCamRUN=0;
+                            }
+                            else if (1 == camShiftFlag){
+                                immediateStopCamMOTOR();
+                                camShiftFlag = 0;
                             }
                             errorFlag =0;
                             cmdFlag=0;
@@ -1589,7 +1593,9 @@ void app_main(void)
             }
 
         }
+        if (1 == flagMotorRUN){
         readSpeed();
+        }
     }
 }
 
