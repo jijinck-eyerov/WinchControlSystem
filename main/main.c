@@ -1317,8 +1317,8 @@ static void remote_read_task(void *pvParameter)
                             // stopCamMOTOR();
                             camRatiof = (float)camRatio/1000;
                             camSPEED= (int)(((winchSPEED*pulseRate)/60)*camRatiof);
-                            camAcceSPEED = CalcAccelRate(camSPEED);
-                            camDeceSPEED = CalcAccelRate(camSPEED);
+                            camAcceSPEED = camSPEED;
+                            camDeceSPEED = camSPEED;
                             // printf("cam acce = %ld", camAcceSPEED);
                             // printf("cam decce = %ld", camDeceSPEED);
                             setCamACCE(camAcceSPEED);
@@ -1336,8 +1336,8 @@ static void remote_read_task(void *pvParameter)
                             // stopCamMOTOR();
                             camRatiof = (float)camRatio/1000;
                             camSPEED= (int)(((winchSPEED*pulseRate)/60)*camRatiof);
-                            camAcceSPEED = CalcAccelRate(camSPEED);
-                            camDeceSPEED = CalcAccelRate(camSPEED);
+                            camAcceSPEED = camSPEED;
+                            camDeceSPEED = camSPEED;
                             // printf("cam acce = %ld", camAcceSPEED);
                             // printf("cam decce = %ld", camDeceSPEED);
                             setCamACCE(camAcceSPEED);
