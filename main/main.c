@@ -196,7 +196,7 @@ void processCommand(char dataArray[]) {
         }
         else if (('p' == dataArray[4]) && ('u' == dataArray[5]) && ('l' == dataArray[6]) && ('r' == dataArray[7]) && (' ' == dataArray[8])) {
             int32_t inptPulseRate = atoi(&dataArray[9]);
-            printf("Setting CamRatio %ld\n", inptPulseRate);
+            printf("Setting PulseRate %ld\n", inptPulseRate);
             pulseRate =inptPulseRate;
             savePulseRate();
 
