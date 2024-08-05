@@ -164,71 +164,181 @@ uint32_t *ptr = numbers;
 int arrayindex = 0; 
 uint32_t movingAverage= 0;
 int pointerMul = sizeof(numbers)/(ARRAYSIZE* sizeof(int));
+char responseData[1024];
+
 
 void saveWinchSPEED(void);
 void saveStopTime(void);
 void saveCamRatio(void);
 void savePulseRate(void);
 void savePulseRate(void);
+int sendData(const char* logName, const char* data);
 
 void processCommand(char dataArray[]) {
+
 
     if (('c' == dataArray[0]) && ('f' == dataArray[1]) && ('g' == dataArray[2]) && (' ' == dataArray[3])) {
         if (('s' == dataArray[4]) && ('p' == dataArray[5]) && ('d' == dataArray[6]) && (' ' == dataArray[7])) {
             uint32_t speedinput = atoi(&dataArray[8]); 
-            printf("Setting speed to %ld\n", speedinput);
+            // printf("Setting speed to %ld\n", speedinput);
             winchSPEED= speedinput;
             saveWinchSPEED();
+            lcd_clear();
+            sprintf(buffer, "Speed set = %ld", speedinput);
+            lcd_put_cur(0, 0);
+            lcd_send_string(buffer);
+            sprintf(responseData,"{\"cmd\":\"cfg\",\"value\":{\"spd\":\"success\"}}\r\n");
+            sendData("TX_DATA",responseData);
+            
         }
         else if (('t' == dataArray[4]) && ('i' == dataArray[5]) && ('m' == dataArray[6]) && ('e' == dataArray[7]) && (' ' == dataArray[8])) {
             uint32_t timeValue = atoi(&dataArray[9]);
-            printf("Setting time value to %ld\n", timeValue);
+            // printf("Setting time value to %ld\n", timeValue);
             stoptime =timeValue;
             saveStopTime();
-        
+            lcd_clear();
+            sprintf(buffer, "Stoptime = %ld", timeValue); 
+            lcd_put_cur(0, 0);
+            lcd_send_string(buffer);           
+            sprintf(responseData,"{\"cmd\":\"cfg\",\"value\":{\"time\":\"success\"}}\r\n");
+            sendData("TX_DATA",responseData);
+
+
         }
         else if (('c' == dataArray[4]) && ('a' == dataArray[5]) && ('m' == dataArray[6]) && ('r' == dataArray[7]) && (' ' == dataArray[8])) {
             int32_t inputCamRatio = atoi(&dataArray[9]);
-            printf("Setting CamRatio %ld\n", inputCamRatio);
+            // printf("Setting CamRatio %ld", inputCamRatio);
             camRatio =inputCamRatio;
             saveCamRatio();
+            lcd_clear();
+            sprintf(buffer, "CamRatio = %ld", inputCamRatio);
+            lcd_put_cur(0, 0);
+            lcd_send_string(buffer);  
+            sprintf(responseData,"{\"cmd\":\"cfg\",\"value\":{\"camr\":\"success\"}}\r\n");
+            sendData("TX_DATA",responseData);
+
+
             
         }
         else if (('p' == dataArray[4]) && ('u' == dataArray[5]) && ('l' == dataArray[6]) && ('r' == dataArray[7]) && (' ' == dataArray[8])) {
             int32_t inptPulseRate = atoi(&dataArray[9]);
-            printf("Setting PulseRate %ld\n", inptPulseRate);
+            // printf("Setting PulseRate = %ld\n", inptPulseRate);
             pulseRate =inptPulseRate;
             savePulseRate();
+            lcd_clear();
+            sprintf(buffer, "PulseRate = %ld", inptPulseRate);
+            sprintf(responseData,"{\"cmd\":\"cfg\",\"value\":{\"pulr\":\"success\"}}\r\n");
+            lcd_put_cur(0, 0);
+            lcd_send_string(buffer);  
+            sendData("TX_DATA",responseData);
+            
 
         }
         else {
-            printf("Invalid command\n");
+            // printf("Invalid command\n");
+            lcd_clear();
+            sprintf(buffer, "Invalid command");
+            sprintf(responseData,"{\"cmd\":\"cfg\",\"value\":\"invalid\"}\r\n");   
+            lcd_put_cur(0, 0);
+            lcd_send_string(buffer);           
+            sendData("TX_DATA",responseData);
+
+
         }
     }
     else if (('a' == dataArray[0]) && ('c' == dataArray[1]) && ('t' == dataArray[2]) && (' ' == dataArray[3])) {
         if (('f' == dataArray[4]) && ('w' == dataArray[5]) && ('d' == dataArray[6])) {
             cmdFlag = 1;
             serialFlag =1;
-            printf("Activated Forward");
+            // printf("Activated Forward"); 
+            sprintf(responseData,"{\"cmd\":\"act\",\"value\":{\"fwd\":\"success\"}}\r\n");
+            sendData("TX_DATA",responseData);
+
+
         }
         else if (('b' == dataArray[4]) && ('w' == dataArray[5]) && ('d' == dataArray[6])) {
             cmdFlag = 2;
             serialFlag =1;
-            printf("Activated Backward");
+            // printf("Activated Backward");
+            sprintf(responseData,"{\"cmd\":\"act\",\"value\":{\"bwd\":\"success\"}}\r\n");
+            sendData("TX_DATA",responseData);
 
-        
+
         }
         else if (('s' == dataArray[4]) && ('t' == dataArray[5]) && ('o' == dataArray[6]) && ('p' == dataArray[7])) {
             cmdFlag = 3;
             serialFlag =1;
+            sprintf(responseData,"{\"cmd\":\"act\",\"value\":{\"stop\":\"success\"}}\r\n");
+            sendData("TX_DATA",responseData);
+
         }
         else {
-            printf("Invalid command\n");
+            // printf("Invalid command\n");
+            lcd_clear();
+            sprintf(buffer, "Invalid command");
+            lcd_put_cur(0, 0);
+            lcd_send_string(buffer);  
+            sprintf(responseData,"{\"cmd\":\"act\",\"value\":\"invalid\"}\r\n");
+            sendData("TX_DATA",responseData);
+
     }
     }
+    else if (('i' == dataArray[0]) && ('n' == dataArray[1]) && ('f' == dataArray[2]) && ('o' == dataArray[3])&& (' ' == dataArray[4])) {
+        if (('s' == dataArray[5]) && ('p' == dataArray[6]) && ('d' == dataArray[7])) {
+    
+            sprintf(responseData,"{\"cmd\":\"info\",\"value\":{\"spd\": %ld}}\r\n", winchSPEED);
+            sendData("TX_DATA",responseData);
+           
+        }
+        else if (('t' == dataArray[5]) && ('i' == dataArray[6]) && ('m' == dataArray[7]) && ('e' == dataArray[8])) {
+                   
+            sprintf(responseData,"{\"cmd\":\"info\",\"value\":{\"time\": %d}}\r\n",stoptime);
+            sendData("TX_DATA",responseData);
+
+        }
+        else if (('c' == dataArray[5]) && ('a' == dataArray[6]) && ('m' == dataArray[7]) && ('r' == dataArray[8])) {
+                   
+            sprintf(responseData,"{\"cmd\":\"info\",\"value\":{\"camr\": %ld}}\r\n",camRatio);
+            sendData("TX_DATA",responseData);
+
+            
+        }
+        else if (('p' == dataArray[5]) && ('u' == dataArray[6]) && ('l' == dataArray[7]) && ('r' == dataArray[8])) {
+                     
+            sprintf(responseData,"{\"cmd\":\"info\",\"value\":{\"pulr\": %ld}}\r\n",pulseRate);
+            sendData("TX_DATA",responseData);
+
+
+        }
+        else if (('p' == dataArray[5]) && ('a' == dataArray[6]) && ('r' == dataArray[7]) && ('a' == dataArray[8])&& ('m' == dataArray[9])) {
+            sprintf(responseData,"{\"cmd\":\"info\",\"value\":{\"spd\": %ld,\"time\":%d,\"camr\":%ld,\"pulr\":%ld}}\r\n",winchSPEED,stoptime,camRatio,pulseRate);
+            sendData("TX_DATA",responseData);
+
+
+        }
+        else {
+            // printf("Invalid command\n");
+            lcd_clear();
+            sprintf(buffer, "Invalid command");
+            lcd_put_cur(0, 0);
+            lcd_send_string(buffer); 
+            sprintf(responseData,"{\"cmd\":\"info\",\"value\":\"invalid\"}\r\n");
+            sendData("TX_DATA",responseData);
+
+        }
+    }
+    
     else {
-        printf("Invalid command\n");
+        // printf("Invalid command\n");
+        lcd_clear();
+        sprintf(buffer, "Invalid command");
+        lcd_put_cur(0, 0);
+        lcd_send_string(buffer); 
+        sprintf(responseData,"{\"cmd\":\"invalid\"}\r\n");
+        sendData("TX_DATA",responseData);
+
     }
+   
 }
 
 
@@ -749,20 +859,20 @@ void saveCamDirection()
 {
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK) {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        // printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
     } else {
-        printf("Done\n");
+        // printf("Done\n");
 
     err = nvs_set_i8(my_handle, "camDirection", camDirection);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
     // Commit written value.
     // After setting any values, nvs_commit() must be called to ensure changes are written
     // to flash storage. Implementations may write to storage at other times,
     // but this is not guaranteed.
-    printf("Committing updates in NVS ... ");
+    // printf("Committing updates in NVS ... ");
     err = nvs_commit(my_handle);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
     // Close
     nvs_close(my_handle);
@@ -775,17 +885,17 @@ void saveWinchSPEED()
 {
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK) {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        // printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
     } else {
-        printf("Done\n");
+        // printf("Done\n");
 
     err = nvs_set_i32(my_handle, "winchSPEED",winchSPEED);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
 
-    printf("Committing updates in NVS ... ");
+    // printf("Committing updates in NVS ... ");
     err = nvs_commit(my_handle);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
     // Close
     nvs_close(my_handle);
@@ -798,17 +908,17 @@ void savePulseRate()
 {
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK) {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        // printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
     } else {
-        printf("Done\n");
+        // printf("Done\n");
 
     err = nvs_set_i32(my_handle, "pulseRate",pulseRate);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
 
-    printf("Committing updates in NVS ... ");
+    // printf("Committing updates in NVS ... ");
     err = nvs_commit(my_handle);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
     // Close
     nvs_close(my_handle);
@@ -858,17 +968,17 @@ void saveCamRatio()
 {
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK) {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        // printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
     } else {
-        printf("Done\n");
+        // printf("Done\n");
 
     err = nvs_set_i32(my_handle, "camRatio",camRatio);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
 
-    printf("Committing updates in NVS ... ");
+    // printf("Committing updates in NVS ... ");
     err = nvs_commit(my_handle);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
     // Close
     nvs_close(my_handle);
@@ -881,17 +991,17 @@ void saveStopTime()
 {
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &my_handle);
     if (err != ESP_OK) {
-        printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
+        // printf("Error (%s) opening NVS handle!\n", esp_err_to_name(err));
     } else {
-        printf("Done\n");
+        // printf("Done\n");
 
     err = nvs_set_i8(my_handle, "stoptime",stoptime );
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
 
-    printf("Committing updates in NVS ... ");
+    // printf("Committing updates in NVS ... ");
     err = nvs_commit(my_handle);
-    printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
+    // printf((err != ESP_OK) ? "Failed!\n" : "Done\n");
 
     // Close
     nvs_close(my_handle);
@@ -910,6 +1020,7 @@ static void remote_read_task(void *pvParameter)
     uint16_t last_buttons = 0;
     
     joystick_buttons_event_t ev;
+    ev.state = 0;
     QueueHandle_t joystick_buttons_events = joystick_buttons_init();
 
     while(true) {
@@ -1041,7 +1152,7 @@ static void remote_read_task(void *pvParameter)
                                 setACCE( acceSPEED );
                                 setDECE( acceSPEED );
                                 setSPEED(((int)(winchSPEED*pulseRate)/60));
-                                printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
+                                // printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
                                 startMOTOR();
                                 lcd_clear();
                                 sprintf(buffer, "FORWORD= %ld ", winchSPEED);
@@ -1077,7 +1188,7 @@ static void remote_read_task(void *pvParameter)
                                 setACCE( acceSPEED );
                                 setDECE( acceSPEED );
                                 setSPEED(((int)(winchSPEED*pulseRate)/60));
-                                printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
+                                // printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
                                 startMOTOR();
                                 lcd_clear();
                                 sprintf(buffer, "FORWORD= %ld ", winchSPEED);
@@ -1112,7 +1223,7 @@ static void remote_read_task(void *pvParameter)
                             setACCE( acceSPEED );
                             setDECE( acceSPEED );
                             setSPEED(-1*((int)(winchSPEED*pulseRate)/60));
-                            printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
+                            // printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
                             startMOTOR();
                             lcd_clear();
                             sprintf(buffer, "FORWORD= %ld ", winchSPEED);
@@ -1148,7 +1259,7 @@ static void remote_read_task(void *pvParameter)
                             setACCE( acceSPEED );
                             setDECE( acceSPEED );
                             setSPEED(-1*((int)(winchSPEED*pulseRate)/60));
-                            printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
+                            // printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
                             startMOTOR();
                             lcd_clear();
                             sprintf(buffer, "FORWORD= %ld ", winchSPEED);
@@ -1171,7 +1282,7 @@ static void remote_read_task(void *pvParameter)
                             setACCE( acceSPEED );
                             setDECE( acceSPEED );
                             setSPEED(((int)(winchSPEED*pulseRate)/60));
-                            printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
+                            // printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
 
                             camRatiof = (float)camRatio/1000;
                             camSPEED= (int)(((winchSPEED*pulseRate)/60)*camRatiof);
@@ -1210,7 +1321,7 @@ static void remote_read_task(void *pvParameter)
                             // }                
                             setCamACCE(camAcceSPEED);
                             setCamDECE(camDeceSPEED);
-                            printf("cam acce = %ld", camAcceSPEED);
+                            // printf("cam acce = %ld", camAcceSPEED);
                             // printf("cam decce = %ld", camDeceSPEED);
                             setCamSPEED(camMOV * camSPEED);
                             startCamMOTOR();
@@ -1233,7 +1344,7 @@ static void remote_read_task(void *pvParameter)
                             setACCE( acceSPEED );
                             setDECE( deceSPEED );
                             setSPEED(-1*((int)(winchSPEED*pulseRate)/60));
-                            printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
+                            // printf("speed = %d", ((int)(winchSPEED*pulseRate)/60));
                             camRatiof = (float)camRatio/1000;
                             camSPEED= (int)(((int)(winchSPEED*pulseRate)/60)*camRatiof);
                             startMOTOR();
@@ -1271,7 +1382,7 @@ static void remote_read_task(void *pvParameter)
                             // }  
                             setCamACCE(camAcceSPEED);
                             setCamDECE(camDeceSPEED);
-                            printf("cam acce = %ld", camAcceSPEED);
+                            // printf("cam acce = %ld", camAcceSPEED);
                             // printf("cam decce = %ld", camDeceSPEED);
                             setCamSPEED(camMOV * camSPEED);
                             startCamMOTOR();
@@ -1379,7 +1490,7 @@ static void remote_read_task(void *pvParameter)
                                 flagMotorRUN =0;
                                 // flagCamRUN =0;
                                 timerCam = stoptime;
-                                printf("starting timerCam");
+                                // printf("starting timerCam");
                                 ESP_LOGI(REMOTE_CONTR, "MOTOR STOP");
                                 lcd_clear();
                                 sprintf(buffer, "MOTOR STOPS");
@@ -1574,8 +1685,10 @@ void app_main(void)
             sprintf(buffer, "SPEED= %ld", movingAverage);
             lcd_put_cur(0, 0);
             lcd_send_string(buffer);
+            sprintf(responseData,"{\"cmd\":\"info\",\"value\":{\"currentSpd\": %ld}}\r\n", movingAverage);
+            sendData("TX_DATA",responseData);
         }
-
+        
         sprintf(buffer, "T1=%d\'C T2=%d\'C", (int)temperature1,(int) temperature2);
         lcd_put_cur(1, 0);
         lcd_send_string(buffer);
@@ -1584,12 +1697,12 @@ void app_main(void)
     
         if (0 < timerCam)
         {
-            printf("timerCam= %d\r\n", timerCam);
+            // printf("timerCam= %d\r\n", timerCam);
             timerCam--;
             if ((0 ==timerCam) && (0== flagMotorRUN))
             {
                 flagCamRUN =0;
-                printf("timerCam stops\r\n");
+                // printf("timerCam stops\r\n");
             }
 
         }
