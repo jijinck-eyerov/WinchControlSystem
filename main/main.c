@@ -68,13 +68,12 @@ static const int RX_BUF_SIZE = 1024;
 static const int TX_BUF_SIZE = 8;
 char buffer[17];
 
-// static const gpio_num_t SENSOR_GPIO = GPIO_NUM_17;
+static const gpio_num_t SENSOR_GPIO = GPIO_NUM_17;
 
 // Use address of your own sensor here!
 // You can find out the address of your sensor by running ds18x20_multi example
-// static const onewire_addr_t SENSOR_ADDR1 = 0x213de10457a2fa28;
-// static const onewire_addr_t SENSOR_ADDR2 = 0xdb3de10457f15628 ;
-
+static const onewire_addr_t SENSOR_ADDR1 = 0x213de10457a2fa28;
+static const onewire_addr_t SENSOR_ADDR2 = 0xdb3de10457f15628 ;
 // for second
 // static const onewire_addr_t SENSOR_ADDR1 = 0xcb1529961d64ff28;
 // static const onewire_addr_t SENSOR_ADDR2 = 0x0d3de10457703828 ;
@@ -1526,7 +1525,8 @@ static void remote_read_task(void *pvParameter)
 void app_main(void)
 {
     
-    // esp_err_t res;
+    esp_err_t res;
+
     float temperature1=0, temperature2=0;
 
     // Initialize NVS==============================================
@@ -1649,26 +1649,27 @@ void app_main(void)
     lcd_clear();
     lcd_put_cur(0, 0);
     lcd_send_string(buffer);
-    
+    gpio_set_pull_mode(SENSOR_GPIO, GPIO_PULLUP_ONLY);
+
     while (1) {
         
         // //====================================================================
-        // res = ds18x20_measure_and_read(SENSOR_GPIO, SENSOR_ADDR1, &temperature1);
-        // if (res != ESP_OK)
-        //     ESP_LOGE(REMOTE_CONTR, "Could not read from sensor %08" PRIx32 "%08" PRIx32 ": %d (%s)",
-        //             (uint32_t)(SENSOR_ADDR1 >> 32), (uint32_t)SENSOR_ADDR1, res, esp_err_to_name(res));
-        // else
-        //     // ESP_LOGI(REMOTE_CONTR, "Sensor 1 %08" PRIx32 "%08" PRIx32 ": %.2f°C",
-        //     //         (uint32_t)(SENSOR_ADDR1 >> 32), (uint32_t)SENSOR_ADDR1, temperature1);
+        res = ds18x20_measure_and_read(SENSOR_GPIO, SENSOR_ADDR1, &temperature1);
+        if (res != ESP_OK)
+            ESP_LOGE(REMOTE_CONTR, "Could not read from sensor %08" PRIx32 "%08" PRIx32 ": %d (%s)",
+                    (uint32_t)(SENSOR_ADDR1 >> 32), (uint32_t)SENSOR_ADDR1, res, esp_err_to_name(res));
+        else
+            ESP_LOGI(REMOTE_CONTR, "Sensor 1 %08" PRIx32 "%08" PRIx32 ": %.2f°C",
+                    (uint32_t)(SENSOR_ADDR1 >> 32), (uint32_t)SENSOR_ADDR1, temperature1);
         
         
-        // res = ds18x20_measure_and_read(SENSOR_GPIO, SENSOR_ADDR2, &temperature2);
-        // if (res != ESP_OK)
-        //     ESP_LOGE(REMOTE_CONTR, "Could not read from sensor %08" PRIx32 "%08" PRIx32 ": %d (%s)",
-        //             (uint32_t)(SENSOR_ADDR2 >> 32), (uint32_t)SENSOR_ADDR2, res, esp_err_to_name(res));
-        // else
-            // ESP_LOGI(REMOTE_CONTR, "Sensor 2 %08" PRIx32 "%08" PRIx32 ": %.2f°C",
-            //         (uint32_t)(SENSOR_ADDR2 >> 32), (uint32_t)SENSOR_ADDR2, temperature2);
+        res = ds18x20_measure_and_read(SENSOR_GPIO, SENSOR_ADDR2, &temperature2);
+        if (res != ESP_OK)
+            ESP_LOGE(REMOTE_CONTR, "Could not read from sensor %08" PRIx32 "%08" PRIx32 ": %d (%s)",
+                    (uint32_t)(SENSOR_ADDR2 >> 32), (uint32_t)SENSOR_ADDR2, res, esp_err_to_name(res));
+        else
+            ESP_LOGI(REMOTE_CONTR, "Sensor 2 %08" PRIx32 "%08" PRIx32 ": %.2f°C",
+                    (uint32_t)(SENSOR_ADDR2 >> 32), (uint32_t)SENSOR_ADDR2, temperature2);
         //====================================================================            
 
         vTaskDelay(pdMS_TO_TICKS(1000));   
